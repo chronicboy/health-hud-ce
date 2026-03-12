@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "health-hud-ce",
+  "version": "${version}",
+  "name": "Health HUD CE",
+  "description": "Displays health above entities in Better Than Wolves CE 3.0.0",
+  "authors": ["chronicboy31"],
+  "license": "CC0-1.0",
+  "icon": "assets/health-hud-ce/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.fabricmc.example.ExampleMod"],
+    "btw:addon": ["btw.community.example.HealthHudAddon"]
+  },
+  "custom": {
+    "btw:addon_prefix": "HH"
+  },
+  "mixins": ["health-hud-ce.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": "1.6.4"
+  }
+}
