@@ -6,6 +6,7 @@ import net.minecraft.src.EntityLiving;
 import net.minecraft.src.FontRenderer;
 import net.minecraft.src.RenderManager;
 import net.minecraft.src.Tessellator;
+import net.minecraft.src.OpenGlHelper;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,10 +39,14 @@ public class HealthHudMixin {
 		try {
 			GL11.glDisable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_DEPTH_TEST);
-			GL11.glDepthMask(false);
+			GL11.glDepthMask(true);
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
+			
+			OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+			// Alpha test remains enabled so font texture transparency doesn't write to depth buffer
 			
 			GL11.glTranslated(ex - rm.viewerPosX, ey + offsetY - rm.viewerPosY, ez - rm.viewerPosZ);
 			GL11.glRotatef(-rm.playerViewY, 0.0F, 1.0F, 0.0F);
@@ -57,6 +62,8 @@ public class HealthHudMixin {
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			
 			float fillW = barW * healthPercent;
+			
+			// Draw green fill for current health
 			if (fillW > 0) {
 				t.startDrawingQuads();
 				t.setColorRGBA(85, 255, 85, 220);
@@ -79,6 +86,7 @@ public class HealthHudMixin {
 			int txtY = barY + (barH - 8) / 2;
 			
 			int outlineColor = 0x000000;
+			GL11.glTranslatef(0.0F, 0.0F, -0.02F);
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dy = -1; dy <= 1; dy++) {
 					if (dx != 0 || dy != 0) {
@@ -87,11 +95,17 @@ public class HealthHudMixin {
 				}
 			}
 			font.drawString(text, txtX, txtY, 0xFFFFFF);
+			GL11.glTranslatef(0.0F, 0.0F, 0.02F);
 		} finally {
 			GL11.glDepthMask(true);
 			GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
 			GL11.glDisable(GL11.GL_BLEND);
+			
+			OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+			
 			GL11.glPopMatrix();
 		}
 	}
